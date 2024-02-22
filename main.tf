@@ -1,9 +1,10 @@
+#set up provider and region
 provider "aws" {
   region = "us-east-1"
 }
 
 
-#create vpc
+#create vpc in the region
 resource "aws_vpc" "dev" {
   cidr_block       = "10.0.0.0/16"
   instance_tenancy = "default"
@@ -207,6 +208,8 @@ resource "aws_lb" "dev" {
 
 }
 
+#Create load balancer listener
+
 resource "aws_lb_listener" "dev" {
   load_balancer_arn = aws_lb.dev.arn
   port              = "80"
@@ -218,7 +221,7 @@ resource "aws_lb_listener" "dev" {
   }
 
 }
-
+#Create launch template
 resource "aws_launch_template" "dev-1" {
   name          = "dev-1-1"
   image_id      = "ami-0c7217cdde317cfec"
@@ -243,6 +246,8 @@ EOF
   }
 }
 
+#Create autoscaling group
+
 resource "aws_autoscaling_group" "dev-1" {
   name                      = "dev-1"
   vpc_zone_identifier       = [aws_subnet.dev-1-1a.id, aws_subnet.dev-1-1b.id, aws_subnet.dev-1-1c.id, aws_subnet.dev-1-1d.id]
@@ -259,241 +264,23 @@ resource "aws_autoscaling_group" "dev-1" {
 
 }
 
+#Create autoscaling attachment and policy
+
 resource "aws_autoscaling_attachment" "dev-1" {
   autoscaling_group_name = aws_autoscaling_group.dev-1.id
   lb_target_group_arn    = aws_lb_target_group.tg-1.arn
 
 }
 
+resource "aws_autoscaling_policy" "aws_autoscaling_policy" {
+  autoscaling_group_name = aws_autoscaling_group.dev-1.name
+  name                   = "dev-1"
+  policy_type            = "TargetTrackingScaling"
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 70
+  }
+}
 
-
-# #CREATE NETWORK INTERFACE
-
-# resource "aws_network_interface" "dev-1-1a" {
-#   subnet_id       = aws_subnet.dev-1-1a.id
-#   private_ips     = ["10.0.1.50"]
-#   security_groups = [aws_security_group.dev-1.id]
-
-# }
-
-# resource "aws_network_interface" "dev-1-1b" {
-#   subnet_id       = aws_subnet.dev-1-1b.id
-#   private_ips     = ["10.0.2.50"]
-#   security_groups = [aws_security_group.dev-1.id]
-
-# }
-
-# resource "aws_network_interface" "dev-1-1c" {
-#   subnet_id       = aws_subnet.dev-1-1c.id
-#   private_ips     = ["10.0.3.50"]
-#   security_groups = [aws_security_group.dev-1.id]
-
-# }
-
-# resource "aws_network_interface" "dev-1-1d" {
-#   subnet_id       = aws_subnet.dev-1-1d.id
-#   private_ips     = ["10.0.4.50"]
-#   security_groups = [aws_security_group.dev-1.id]
-
-# }
-
-
-
-# #assign elastic IP
-# resource "aws_eip" "one" {
-#   domain                    = "vpc"
-#   network_interface         = aws_network_interface.dev-1-1a.id
-#   associate_with_private_ip = "10.0.1.50"
-#   depends_on                = [aws_internet_gateway.gw]
-# }
-
-# resource "aws_eip" "two" {
-#   domain                    = "vpc"
-#   network_interface         = aws_network_interface.dev-1-1b.id
-#   associate_with_private_ip = "10.0.2.50"
-#   depends_on                = [aws_internet_gateway.gw]
-# }
-
-
-# resource "aws_eip" "three" {
-#   domain                    = "vpc"
-#   network_interface         = aws_network_interface.dev-1-1c.id
-#   associate_with_private_ip = "10.0.3.50"
-#   depends_on                = [aws_internet_gateway.gw]
-# }
-
-# resource "aws_eip" "four" {
-#   domain                    = "vpc"
-#   network_interface         = aws_network_interface.dev-1-1d.id
-#   associate_with_private_ip = "10.0.4.50"
-#   depends_on                = [aws_internet_gateway.gw]
-# }
-
-# #create instance
-# resource "aws_instance" "dev-1-1a" {
-#   ami           = "ami-0c7217cdde317cfec"
-#   instance_type = "t2.micro"
-#   key_name      = "dev-1"
-
-
-#   network_interface {
-#     device_index         = 0
-#     network_interface_id = aws_network_interface.dev-1-1a.id
-#   }
-
-#   user_data = <<-EOF
-#             #!/bin/bash
-#             sudo apt update -y
-#             sudo apt install apache2 -y
-#             sudo systemctl start apache2
-#             sudo bash -c 'echo Hello, world. Made by Vishesh Vaibhav. For course - Cloud Programming(DLBSEPCP01_E) > /var/www/html/index.html'
-#             EOF
-#   tags = {
-#     Name = "dev-1-1a"
-#   }
-
-# }
-
-# resource "aws_instance" "dev-1-1b" {
-#   ami           = "ami-0c7217cdde317cfec"
-#   instance_type = "t2.micro"
-#   key_name      = "dev-1"
-
-
-#   network_interface {
-#     device_index         = 0
-#     network_interface_id = aws_network_interface.dev-1-1b.id
-#   }
-#   user_data = <<-EOF
-#             #!/bin/bash
-#             sudo apt update -y
-#             sudo apt install apache2 -y
-#             sudo systemctl start apache2
-#             sudo bash -c 'echo Hello, world. Made by Vishesh Vaibhav. For course - Cloud Programming(DLBSEPCP01_E) > /var/www/html/index.html'
-#             EOF
-
-#   tags = {
-#     Name = "dev-1-1b"
-#   }
-
-# }
-
-# resource "aws_instance" "dev-1-1c" {
-#   ami           = "ami-0c7217cdde317cfec"
-#   instance_type = "t2.micro"
-#   key_name      = "dev-1"
-
-
-#   network_interface {
-#     device_index         = 0
-#     network_interface_id = aws_network_interface.dev-1-1c.id
-#   }
-#   user_data = <<-EOF
-#             #!/bin/bash
-#             sudo apt update -y
-#             sudo apt install apache2 -y
-#             sudo systemctl start apache2
-#             sudo bash -c 'echo Hello, world. Made by Vishesh Vaibhav. For course - Cloud Programming(DLBSEPCP01_E) > /var/www/html/index.html'
-#             EOF
-
-#   tags = {
-#     Name = "dev-1-1c"
-#   }
-
-# }
-# resource "aws_instance" "dev-1-1d" {
-#   ami           = "ami-0c7217cdde317cfec"
-#   instance_type = "t2.micro"
-#   key_name      = "dev-1"
-
-
-#   network_interface {
-#     device_index         = 0
-#     network_interface_id = aws_network_interface.dev-1-1d.id
-#   }
-#   user_data = <<-EOF
-#             #!/bin/bash
-#             sudo apt update -y
-#             sudo apt install apache2 -y
-#             sudo systemctl start apache2
-#             sudo bash -c 'echo Hello, world. Made by Vishesh Vaibhav. For course - Cloud Programming(DLBSEPCP01_E) > /var/www/html/index.html'
-#             EOF
-#   tags = {
-#     Name = "dev-1-1d"
-#   }
-
-# }
-
-
-# resource "aws_ami_from_instance" "dev-1-1a" {
-#   name               = "dev-1-1a"
-#   source_instance_id = aws_instance.dev-1-1a.id
-# }
-
-
-
-
-# resource "aws_autoscaling_group" "dev-1-1a" {
-#   name                      = "dev-1-1a"
-#   vpc_zone_identifier       = ["subnet-0eac765445e86c097"]
-#   max_size                  = 10
-#   min_size                  = 5
-#   desired_capacity          = 7
-#   health_check_grace_period = 60
-
-#   launch_template {
-#     id      = aws_launch_template.dev-1.id
-#     version = "$Default"
-
-#   }
-
-# }
-
-
-# resource "aws_autoscaling_group" "dev-1-1b" {
-#   name                      = "dev-1-1b"
-#   vpc_zone_identifier       = ["subnet-031d39488e1fe53e8"]
-#   max_size                  = 10
-#   min_size                  = 5
-#   desired_capacity          = 7
-#   health_check_grace_period = 60
-
-#   launch_template {
-#     id      = aws_launch_template.dev-1.id
-#     version = "$Default"
-
-#   }
-
-# }
-
-# resource "aws_autoscaling_group" "dev-1-1c" {
-#   name                      = "dev-1-1c"
-#   vpc_zone_identifier       = ["subnet-05b126ec96ee1443e"]
-#   max_size                  = 10
-#   min_size                  = 5
-#   desired_capacity          = 7
-#   health_check_grace_period = 60
-
-#   launch_template {
-#     id      = aws_launch_template.dev-1.id
-#     version = "$Default"
-
-#   }
-
-# }
-
-# resource "aws_autoscaling_group" "dev-1-1d" {
-#   name                      = "dev-1-1d"
-#   vpc_zone_identifier       = ["subnet-099290ac116741f10"]
-#   max_size                  = 10
-#   min_size                  = 5
-#   desired_capacity          = 7
-#   health_check_grace_period = 60
-
-#   launch_template {
-#     id      = aws_launch_template.dev-1.id
-#     version = "$Default"
-
-#   }
-
-# }
