@@ -1,4 +1,4 @@
-# terraform-aws
+# Terraform AWS Web Application Deployment
 
 Prerequisites:
 Before executing this deployment on your local machine, ensure that you have Terraform installed. If Terraform is not already installed on your system, you can download and install it from here based on your operating system.
