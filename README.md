@@ -5,9 +5,11 @@ Before executing this deployment on your local machine, ensure that you have Ter
 
 Additionally, you'll need to set up your AWS credentials as environment variables. Follow the steps below to set up your credentials:
 
-## AWS Access Key : Log in to your AWS account and create an access key if one has not been created already.
+## AWS Access Key:
+Log in to your AWS account and create an access key if one has not been created already.
 
-## AWS Secret Key : This key is associated with the access key and provides authentication.
+## AWS Secret Key :
+This key is associated with the access key and provides authentication.
 
 # Steps to Set Up :
   Download and open the main.tf file from this repository in your preferred Integrated Development Environment (IDE) such as Visual Studio Code (VSCode).
