@@ -47,9 +47,9 @@ terraform init
 ```terminal
 
 terraform plan
-'''
+```
 
-## Apply the changes to deploy the web application:## 
+## Apply the changes to deploy the web application:
 ```terminal
 
 terraform apply
